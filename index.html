@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What I Think About You</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            animation: float 15s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-container {
+            max-width: 800px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .admin-dashboard {
+            max-width: 1000px;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .admin-link {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            transition: all 0.3s;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 100;
+        }
+
+        .admin-link:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 18px 20px;
+            margin: 15px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            margin: 40px 0;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Chat Interface */
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px 30px;
+            border-radius: 30px 30px 0 0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+            position: relative;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-admin {
+            align-self: flex-start;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-user {
+            align-self: flex-end;
+            background: #f0f0f0;
+            color: #333;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .chat-input-container {
+            padding: 25px 30px;
+            background: white;
+            border-radius: 0 0 30px 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+
+        .chat-input {
+            flex: 1;
+            margin: 0;
+            border-radius: 25px;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Admin Dashboard */
+        .user-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: 2px solid #f0f0f0;
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .user-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .message-count {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .conversation-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .preview-message {
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .preview-admin {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-right: 20%;
+        }
+
+        .preview-user {
+            background: #e0e0e0;
+            margin-left: 20%;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            resize: vertical;
+            min-height: 100px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 15px;
+            padding: 12px;
+            background: #fee;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            box-shadow: 0 10px 30px rgba(149, 165, 166, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+                width: 95%;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .chat-container {
+                height: 95vh;
+                width: 100%;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Page -->
+    <div id="mainPage" class="container">
+        <h1>✨ What I Think About You</h1>
+        <h2>Discover my thoughts and start a conversation</h2>
+        <button class="btn" onclick="goToUserPage()">Continue</button>
+    </div>
+
+    <!-- User Name Entry -->
+    <div id="userPage" class="container hidden">
+        <h1>👋 Welcome!</h1>
+        <h2>Enter your name to see what I think about you</h2>
+        <input type="text" id="userName" placeholder="Your name..." onkeypress="if(event.key==='Enter') submitName()">
+        <button class="btn" onclick="submitName()">Let's Go</button>
+        <button class="btn back-btn" onclick="goToMain()">Back</button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingPage" class="container hidden">
+        <h1>🤔 Thinking...</h1>
+        <h2>Preparing your personalized message</h2>
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div id="chatPage" class="container chat-container hidden">
+        <div class="chat-header">
+            <h2 id="chatUserName">Chat</h2>
+            <div class="logout-btn" onclick="logoutUser()">Logout</div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="messageInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- Admin Login -->
+    <div id="adminLogin" class="container hidden">
+        <h1>🔐 Admin Login</h1>
+        <h2>Enter password to access dashboard</h2>
+        <input type="password" id="adminPassword" placeholder="Password..." onkeypress="if(event.key==='Enter') checkPassword()">
+        <button class="btn" onclick="checkPassword()">Login</button>
+        <div id="loginError" class="error hidden">❌ Incorrect password!</div>
+        <button class="btn back-btn" onclick="goToMain()">Back</button>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="container admin-dashboard hidden">
+        <h1>📊 Admin Dashboard</h1>
+        <h2>Manage conversations with users</h2>
+        <div id="userCards"></div>
+        <button class="btn back-btn" onclick="logoutAdmin()">Logout</button>
+    </div>
+
+    <!-- Admin Link -->
+    <a href="#" class="admin-link" id="adminLink" onclick="goToAdminLogin(); return false;">🔐 Admin</a>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, push } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlpOqjYbQKcpZO5l3d0gRJbNPZdeKfsUg",
+            authDomain: "didybl.firebaseapp.com",
+            databaseURL: "https://didybl-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "didybl",
+            storageBucket: "didybl.firebasestorage.app",
+            messagingSenderId: "519998499974",
+            appId: "1:519998499974:web:ade139e0e1662cd3633507",
+            measurementId: "G-KWDHL7CM6L"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const ADMIN_PASSWORD = "admin123";
+        let currentUser = null;
+        let isAdmin = false;
+
+        window.showPage = function(pageId) {
+            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+            
+            if (pageId === 'adminLogin' || pageId === 'adminDashboard') {
+                document.getElementById('adminLink').style.display = 'none';
+            } else {
+                document.getElementById('adminLink').style.display = 'block';
+            }
+        }
+
+        window.goToMain = function() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            showPage('mainPage');
+        }
+
+        window.goToUserPage = function() {
+            showPage('userPage');
+            document.getElementById('userName').value = '';
+            document.getElementById('userName').focus();
+        }
+
+        window.goToAdminLogin = function() {
+            showPage('adminLogin');
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+            document.getElementById('adminPassword').focus();
+        }
+
+        window.submitName = async function() {
+            const name = document.getElementById('userName').value.trim();
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            currentUser = name;
+            localStorage.setItem('currentUser', name);
+            
+            showPage('loadingPage');
+
+            // Create user in database if doesn't exist
+            const userRef = ref(database, `users/${name}`);
+            const snapshot = await get(userRef);
+            
+            if (!snapshot.exists()) {
+                await set(userRef, {
+                    name: name,
+                    createdAt: Date.now()
+                });
+            }
+
+            setTimeout(() => {
+                loadChat(name);
+            }, 2000);
+        }
+
+        async function loadChat(userName) {
+            currentUser = userName;
+            document.getElementById('chatUserName').textContent = `💬 ${userName}`;
+            showPage('chatPage');
+
+            const messagesRef = ref(database, `messages/${userName}`);
+            
+            // Check if admin has sent initial message
+            const snapshot = await get(messagesRef);
+            if (!snapshot.exists()) {
+                // No messages yet - show empty state
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Waiting for the admin to send you a message...</p>
+                    </div>
+                `;
+            }
+
+            // Listen for new messages
+            onValue(messagesRef, (snapshot) => {
+                displayMessages(snapshot.val());
+            });
+        }
+
+        function displayMessages(messages) {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+
+            if (!messages) {
+                chatMessages.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Waiting for the admin to send you a message...</p>
+                    </div>
+                `;
+                return;
+            }
+
+            Object.values(messages).forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.sender === 'admin' ? 'message-admin' : 'message-user'}`;
+                
+                const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                messageDiv.innerHTML = `
+                    ${msg.text}
+                    <span class="message-time">${time}</span>
+                `;
+                chatMessages.appendChild(messageDiv);
+            });
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        window.sendMessage = async function() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (!text || !currentUser) return;
+
+            const messagesRef = ref(database, `messages/${currentUser}`);
+            const newMessageRef = push(messagesRef);
+            
+            await set(newMessageRef, {
+                text: text,
+                sender: isAdmin ? 'admin' : 'user',
+                timestamp: Date.now()
+            });
+
+            input.value = '';
+            input.focus();
+        }
+
+        window.logoutUser = function() {
+            goToMain();
+        }
+
+        window.checkPassword = function() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                loadAdminDashboard();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        async function loadAdminDashboard() {
+            showPage('adminDashboard');
+            
+            const usersRef = ref(database, 'users');
+            onValue(usersRef, async (snapshot) => {
+                const users = snapshot.val();
+                const userCards = document.getElementById('userCards');
+                userCards.innerHTML = '';
+
+                if (!users) {
+                    userCards.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <p>No users yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                for (let userName in users) {
+                    const messagesSnapshot = await get(ref(database, `messages/${userName}`));
+                    const messages = messagesSnapshot.val();
+                    const messageCount = messages ? Object.keys(messages).length : 0;
+
+                    const card = document.createElement('div');
+                    card.className = 'user-card';
+                    card.innerHTML = `
+                        <div class="user-name">
+                            ${userName}
+                            <span class="message-count">${messageCount} messages</span>
+                        </div>
+                        ${messages ? `
+                            <div class="conversation-preview">
+                                ${Object.values(messages).slice(-3).map(msg => `
+                                    <div class="preview-message preview-${msg.sender}">
+                                        ${msg.text}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p style="color: #999;">No messages yet</p>'}
+                        <textarea id="admin-msg-${userName}" placeholder="Type your message to ${userName}..."></textarea>
+                        <button class="btn" onclick="sendAdminMessage('${userName}')">Send Message</button>
+                    `;
+                    userCards.appendChild(card);
+                }
+            });
+        }
+
+        window.sendAdminMessage = async function(userName) {
+            const textarea = document.getElementById(`admin-msg-${userName}`);
+            const text = textarea.value.trim();
+            
+            if (!text) return;
+
+            const messagesRef = ref(database, `messages/${userName}`);
+            const newMessageRef = push(messagesRef);
+            
+            await set(newMessageRef, {
+                text: text,
+                sender: 'admin',
+                timestamp: Date.now()
+            });
+
+            textarea.value = '';
+            alert(`Message sent to ${userName}!`);
+        }
+
+        window.logoutAdmin = function() {
+            isAdmin = false;
+            goToMain();
+        }
+
+        // Check if user is already logged in
+        window.addEventListener('load', () => {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = savedUser;
+                loadChat(savedUser);
+            } else {
+                showPage('mainPage');
+            }
+        });
+    </script>
+</body>
+</html>
